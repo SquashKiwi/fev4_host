@@ -6,13 +6,19 @@ from test_cost import combine_prediction_and_estimation
 import re
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
+# Decompressing meow compression
+file = b""
+for i in range(1 ,4):
+    file += open(f"meow{i}", "rb").read()
+
+
 # --- GLOBAL CONFIG ---
 IMG_SIZE = (256, 256)
 CATEGORIES = ["group1", "group2", "group3", "group4"]
 
 # --- FUNCTIONS ---
 def load_model(model_filename: str):
-    interpreter = tf.lite.Interpreter(model_path=model_filename)
+    interpreter = tf.lite.Interpreter(model_content=file)
     interpreter.allocate_tensors()
 
     # Get input and output details
