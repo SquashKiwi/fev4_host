@@ -2,7 +2,7 @@ import time
 import streamlit as st
 import numpy as np
 import tensorflow as tf
-from test_cost import combine_prediction_and_estimation
+# from test_cost import combine_prediction_and_estimation
 import re
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
@@ -43,6 +43,39 @@ def predict_image(interpreter, image_path: str):
     except Exception as e:
         st.error(f"Error processing image: {e}")
         return None, None
+
+
+def combine_prediction_and_estimation(group: int, age: int, smokes: bool, race: str):
+    """
+    Combines the refined Norwood prediction with the graft estimation (if needed).
+    """
+    refined_stage_str = refined_norwood_prediction(group, age, smokes, race)
+
+    # Norwood Stage 1 => no grafts needed
+    if refined_stage_str == "Norwood Stage 1":
+        return refined_stage_str, "No visible hair loss, zero grafts needed."
+
+    # Extract the numeric portion from "Norwood Stage X"
+    match = re.search(r"(\d+)$", refined_stage_str)
+    if not match:
+        return refined_stage_str, None
+
+    numeric_stage = int(match.group(1))
+    norwood_map = {
+        2: "II",
+        3: "III",
+        4: "IV",
+        5: "V",
+        6: "VI",
+        7: "VII"
+    }
+    roman_stage = norwood_map.get(numeric_stage)
+    if roman_stage is None:
+        return refined_stage_str, None
+
+    graft_est = estimate_grafts(roman_stage, age)
+    return refined_stage_str, graft_est
+
 
 def refined_norwood_prediction(group: int, age: int, smokes: bool, race: str) -> str:
     """Refines Norwood stage prediction based on age, smoking, and race."""
@@ -118,6 +151,8 @@ def print_cost_table(grafts):
 
 # --- STREAMLIT UI ---
 st.title("Male Pattern Baldness Prediction & Cost Estimation")
+url = "https://github.com/SquashKiwi/pattern-baldness-cost-estimation"
+st.write("Read more [here](%s)" % url)
 
 # Upload image
 uploaded_file = st.file_uploader("Upload a scalp image (JPG/PNG)", type=["jpg", "png", "jpeg"])
