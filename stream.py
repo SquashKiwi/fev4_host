@@ -117,7 +117,8 @@ def print_cost_table(grafts):
     return cost_table
 
 # --- STREAMLIT UI ---
-st.title("Male Pattern Baldness Prediction & Cost Estimation")
+st.title("Male Pattern Baldness -")
+st.title("Classification & Cost Estimation")
 
 # Upload image
 uploaded_file = st.file_uploader("Upload a scalp image (JPG/PNG)", type=["jpg", "png", "jpeg"])
